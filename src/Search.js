@@ -2,6 +2,7 @@ import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import * as BooksAPI from "./BooksAPI";
 import { options } from "./utils/utils";
+import SearchError from "./SearchError";
 
 class Search extends React.Component {
   state = {
@@ -61,7 +62,6 @@ class Search extends React.Component {
 
   render() {
       const { books, options, shelf } = this.state;
-      console.log(books);
     const selectItems = options.map((optionItem, index) => {
       return (
         <option
@@ -92,7 +92,7 @@ class Search extends React.Component {
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
-            {books.map((book) => (
+            {!books.error ? books.map((book) => (
               <li key={book.id}>
                 <div className="book">
                   <div className="book-top">
@@ -131,7 +131,7 @@ class Search extends React.Component {
                   </div>
                 </div>
               </li>
-            ))}
+            )) : <SearchError /> }
           </ol>
         </div>
       </div>

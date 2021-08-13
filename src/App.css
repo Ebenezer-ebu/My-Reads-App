@@ -196,3 +196,8 @@ button:active {
   text-align: center;
   font-size: 0.8em;
 }
+
+.book-cover-title-error {
+  padding: 20px 10px 0;
+  text-align: center;
+}
