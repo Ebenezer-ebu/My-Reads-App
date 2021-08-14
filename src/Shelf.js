@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import * as BooksAPI from "./BooksAPI";
 
-const Read = (props) => {
-  const { books, options } = props;
+const Shelf = (props) => {
+  const { books, options, title } = props;
+  let ShelfName =
+    title === "currentlyReading"
+      ? "Currently Reading"
+      : title === "wantToRead"
+      ? "Want To Read"
+      : "Read";
 
-  const [shelf, setShelf] = useState("read");
+  const [shelf, setShelf] = useState(title);
   const handleChange = (e, id) => {
     setShelf(e.target.value);
-    const selectedBook = books.filter((book) => book.id === id);
+    const selectedBook = books[0].filter((book) => book.id === id);
     updateBook(selectedBook, e.target.value);
   };
 
@@ -17,10 +23,8 @@ const Read = (props) => {
       window.location.reload();
     });
   };
+
   useEffect(() => {}, [shelf]);
-  const readBooks = books.filter((book) => {
-    return book.shelf === "read";
-  });
   const selectItems = options.map((optionItem, index) => {
     return (
       <option
@@ -32,12 +36,13 @@ const Read = (props) => {
       </option>
     );
   });
+
   return (
     <div className="bookshelf">
-      <h2 className="bookshelf-title">Read</h2>
+      <h2 className="bookshelf-title">{ShelfName}</h2>
       <div className="bookshelf-books">
         <ol className="books-grid">
-          {readBooks.map((book) => (
+          {books[0]?.map((book) => (
             <li key={book.id}>
               <div className="book">
                 <div className="book-top">
@@ -76,4 +81,4 @@ const Read = (props) => {
     </div>
   );
 };
-export default Read;
+export default Shelf;

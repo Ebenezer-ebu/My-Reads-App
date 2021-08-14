@@ -44,24 +44,24 @@ class Search extends React.Component {
   handleSearch = async (e) => {
     e.preventDefault();
     const { query, compareBooks } = this.state;
-      let books = await BooksAPI.search(query);
-      let response = await books;
-      for (let i = 0; i < response.length; i++) {
-          let bookItem = response[i]
-          for (let j = 0; j < compareBooks.length; j++) {
-              let compareBookItem = compareBooks[j];
-              if (compareBookItem.id === bookItem.id) {
-                  response.splice(i, 1, compareBookItem)
-              } 
-          }
+    let books = await BooksAPI.search(query);
+    let response = await books;
+    for (let i = 0; i < response.length; i++) {
+      let bookItem = response[i];
+      for (let j = 0; j < compareBooks.length; j++) {
+        let compareBookItem = compareBooks[j];
+        if (compareBookItem.id === bookItem.id) {
+          response.splice(i, 1, compareBookItem);
+        }
       }
-      this.setState(() => ({
-          books: response,
-      }))
+    }
+    this.setState(() => ({
+      books: response,
+    }));
   };
 
   render() {
-      const { books, options, shelf } = this.state;
+    const { books, options, shelf } = this.state;
     const selectItems = options.map((optionItem, index) => {
       return (
         <option
@@ -92,46 +92,46 @@ class Search extends React.Component {
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
-            {!books.error ? books.map((book) => (
-              <li key={book.id}>
-                <div className="book">
-                  <div className="book-top">
-                    <div
-                      className="book-cover"
-                      style={{
-                        width: 128,
-                        height: 192,
-                        backgroundImage: `url(${
-                          book.imageLinks
-                            ? book.imageLinks.smallThumbnail
-                            : null
-                        })`,
-                      }}
-                    ></div>
-                    <div className="book-shelf-changer">
-                      <select
-                        value={
-                          book.shelf
-                            ? book.shelf
-                            : shelf
-                        }
-                        onChange={(e) => this.handleChangeSelect(e, book.id)}
-                      >
-                        {selectItems}
-                      </select>
+            {!books.error ? (
+              books.map((book) => (
+                <li key={book.id}>
+                  <div className="book">
+                    <div className="book-top">
+                      <div
+                        className="book-cover"
+                        style={{
+                          width: 128,
+                          height: 192,
+                          backgroundImage: `url(${
+                            book.imageLinks
+                              ? book.imageLinks.smallThumbnail
+                              : null
+                          })`,
+                        }}
+                      ></div>
+                      <div className="book-shelf-changer">
+                        <select
+                          value={book.shelf ? book.shelf : shelf}
+                          onChange={(e) => this.handleChangeSelect(e, book.id)}
+                        >
+                          {selectItems}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="book-title">{book.title}</div>
+                    <div className="book-authors">
+                      {book.authors
+                        ? book.authors.map((author, i) => (
+                            <span key={i}>{author}</span>
+                          ))
+                        : null}
                     </div>
                   </div>
-                  <div className="book-title">{book.title}</div>
-                  <div className="book-authors">
-                    {book.authors
-                      ? book.authors.map((author, i) => (
-                          <span key={i}>{author}</span>
-                        ))
-                      : null}
-                  </div>
-                </div>
-              </li>
-            )) : <SearchError /> }
+                </li>
+              ))
+            ) : (
+              <SearchError />
+            )}
           </ol>
         </div>
       </div>
