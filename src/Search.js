@@ -1,6 +1,7 @@
 import React from "react";
-import { Link, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import * as BooksAPI from "./BooksAPI";
+import InputEmpty from "./InputEmpty";
 import SearchError from "./SearchError";
 
 class Search extends React.Component {
@@ -9,6 +10,8 @@ class Search extends React.Component {
     query: "",
     main: [],
     shelf: "none",
+    inputEmtpy: false,
+    invalidQuery: false,
   };
   handleChangeSearch = async (e) => {
     const { value } = e.target;
@@ -16,26 +19,52 @@ class Search extends React.Component {
       query: value,
     }));
     const { allBooks } = this.props;
-    let books = await BooksAPI.search(value);
-    let response = await books;
-    if (response && response.length > 0) {
-      for (let i = 0; i < response.length; i++) {
-        let bookItem = response[i];
-        for (let j = 0; j < allBooks.length; j++) {
-          let compareBookItem = allBooks[j];
-          if (compareBookItem.id === bookItem.id) {
-            response.splice(i, 1, compareBookItem);
-          }
-        }
-      }
+    if (value.trim().length !== 0) {
       this.setState(() => ({
-        books: response,
+        inputEmtpy: false,
+      }));
+      let books = await BooksAPI.search(value);
+      let response = await books;
+      console.log(response);
+      if (!response.error) {
+        this.setState(() => ({
+          invalidQuery: false,
+        }));
+        if (response && response.length > 0) {
+          response.forEach((bookItem, i) => {
+            allBooks.forEach((compareBookItem) => {
+              if (compareBookItem.id === bookItem.id) {
+                response.splice(i, 1, compareBookItem);
+              }
+            });
+          });
+          // {
+          //   let bookItem = response[i];
+          //   for (let j = 0; j < allBooks.length; j++) {
+          //     let compareBookItem = allBooks[j];
+          //     if (compareBookItem.id === bookItem.id) {
+          //       response.splice(i, 1, compareBookItem);
+          //     }
+          //   }
+          // }
+          this.setState(() => ({
+            books: response,
+          }));
+        }
+      } else {
+        this.setState(() => ({
+          invalidQuery: true,
+        }));
+      }
+    } else {
+      this.setState(() => ({
+        inputEmtpy: true,
       }));
     }
   };
 
   handleChange = (e, id) => {
-    console.log(this.props)
+    console.log(this.props);
     this.setState(() => ({
       shelf: e.target.value,
     }));
@@ -61,14 +90,14 @@ class Search extends React.Component {
     return (
       <div className="search-books">
         <div className="search-books-bar">
-            <button
-              className="close-search"
-              onClick={() => {
-                this.props.history.push("/");
-              }}
-            >
-              Close
-            </button>
+          <button
+            className="close-search"
+            onClick={() => {
+              this.props.history.push("/");
+            }}
+          >
+            Close
+          </button>
           <div className="search-books-input-wrapper">
             <input
               type="text"
@@ -80,7 +109,7 @@ class Search extends React.Component {
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
-            {!books.error ? (
+            {this.state.inputEmtpy === true ? (<InputEmpty />): this.state.invalidQuery === true ? (<SearchError />) : (
               books.map((book) => (
                 <li key={book.id}>
                   <div className="book">
@@ -113,8 +142,6 @@ class Search extends React.Component {
                   </div>
                 </li>
               ))
-            ) : (
-              <SearchError />
             )}
           </ol>
         </div>

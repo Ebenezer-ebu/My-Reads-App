@@ -1,10 +1,10 @@
+import { Route, Switch } from "react-router-dom";
 import React from 'react';
 import MainPage from './MainPage';
 import Search from './Search';
 import { options } from "./utils/utils";
 import NoMatch from './NoMatch';
 import * as BooksAPI from "./BooksAPI";
-import { Route, Switch } from "react-router-dom";
 import './App.css';
 
 class BooksApp extends React.Component {
