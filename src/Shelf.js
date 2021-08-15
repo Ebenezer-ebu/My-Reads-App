@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import * as BooksAPI from "./BooksAPI";
+import React from "react";
 
 const Shelf = (props) => {
-  const { books, options, title } = props;
+  const { books, options, title, handleChange } = props;
   let ShelfName =
     title === "currentlyReading"
       ? "Currently Reading"
@@ -10,21 +9,6 @@ const Shelf = (props) => {
       ? "Want To Read"
       : "Read";
 
-  const [shelf, setShelf] = useState(title);
-  const handleChange = (e, id) => {
-    setShelf(e.target.value);
-    const selectedBook = books[0].filter((book) => book.id === id);
-    updateBook(selectedBook, e.target.value);
-  };
-
-  const updateBook = (book, shelf) => {
-    BooksAPI.update(book[0], shelf).then((res) => {
-      console.log(res);
-      window.location.reload();
-    });
-  };
-
-  useEffect(() => {}, [shelf]);
   const selectItems = options.map((optionItem, index) => {
     return (
       <option
@@ -42,7 +26,7 @@ const Shelf = (props) => {
       <h2 className="bookshelf-title">{ShelfName}</h2>
       <div className="bookshelf-books">
         <ol className="books-grid">
-          {books[0]?.map((book) => (
+          {books?.map((book) => (
             <li key={book.id}>
               <div className="book">
                 <div className="book-top">
@@ -58,7 +42,7 @@ const Shelf = (props) => {
                   ></div>
                   <div className="book-shelf-changer">
                     <select
-                      value={shelf}
+                      value={title}
                       onChange={(e) => handleChange(e, book.id)}
                     >
                       {selectItems}
@@ -67,11 +51,7 @@ const Shelf = (props) => {
                 </div>
                 <div className="book-title">{book.title}</div>
                 <div className="book-authors">
-                  {book.authors
-                    ? book.authors.map((author, i) => (
-                        <span key={i}>{author}</span>
-                      ))
-                    : null}
+                  {book.authors ? book.authors.join(" ") : null}
                 </div>
               </div>
             </li>

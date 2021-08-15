@@ -1,67 +1,52 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import * as BooksAPI from "./BooksAPI";
-import { options } from "./utils/utils";
 import SearchError from "./SearchError";
 
 class Search extends React.Component {
   state = {
     books: [],
-    compareBooks: [],
     query: "",
-    options,
+    main: [],
     shelf: "none",
   };
-
-  handleChange = (e) => {
+  handleChangeSearch = async (e) => {
     const { value } = e.target;
     this.setState(() => ({
       query: value,
     }));
+    const { allBooks } = this.props;
+    let books = await BooksAPI.search(value);
+    let response = await books;
+    if (response && response.length > 0) {
+      for (let i = 0; i < response.length; i++) {
+        let bookItem = response[i];
+        for (let j = 0; j < allBooks.length; j++) {
+          let compareBookItem = allBooks[j];
+          if (compareBookItem.id === bookItem.id) {
+            response.splice(i, 1, compareBookItem);
+          }
+        }
+      }
+      this.setState(() => ({
+        books: response,
+      }));
+    }
   };
 
-  handleChangeSelect = (e, id) => {
+  handleChange = (e, id) => {
+    console.log(this.props)
     this.setState(() => ({
       shelf: e.target.value,
     }));
     const { books } = this.state;
-    const selectedBook = books.filter((book) => book.id === id);
-    this.updateBook(selectedBook, e.target.value);
-  };
-  componentDidMount() {
-    BooksAPI.getAll().then((books) => {
-      this.setState(() => ({
-        compareBooks: books,
-      }));
-    });
-  }
-  updateBook = (book, shelf) => {
-    const { history } = this.props;
-    BooksAPI.update(book[0], shelf).then((res) => console.log(res));
-    if (history) history.push("/");
-  };
-
-  handleSearch = async (e) => {
-    e.preventDefault();
-    const { query, compareBooks } = this.state;
-    let books = await BooksAPI.search(query);
-    let response = await books;
-    for (let i = 0; i < response.length; i++) {
-      let bookItem = response[i];
-      for (let j = 0; j < compareBooks.length; j++) {
-        let compareBookItem = compareBooks[j];
-        if (compareBookItem.id === bookItem.id) {
-          response.splice(i, 1, compareBookItem);
-        }
-      }
-    }
-    this.setState(() => ({
-      books: response,
-    }));
+    const selectedBook = books.find((book) => book.id === id);
+    this.props.refetch(selectedBook, e.target.value);
   };
 
   render() {
-    const { books, options, shelf } = this.state;
+    const { books, shelf } = this.state;
+    const { options } = this.props;
     const selectItems = options.map((optionItem, index) => {
       return (
         <option
@@ -76,18 +61,21 @@ class Search extends React.Component {
     return (
       <div className="search-books">
         <div className="search-books-bar">
-          <Link to="/">
-            <button className="close-search">Close</button>
-          </Link>
+            <button
+              className="close-search"
+              onClick={() => {
+                this.props.history.push("/");
+              }}
+            >
+              Close
+            </button>
           <div className="search-books-input-wrapper">
-            <form onSubmit={(e) => this.handleSearch(e)}>
-              <input
-                type="text"
-                placeholder="Search by title or author"
-                value={this.state.query}
-                onChange={this.handleChange}
-              />
-            </form>
+            <input
+              type="text"
+              placeholder="Search by title or author"
+              value={this.state.query}
+              onChange={this.handleChangeSearch}
+            />
           </div>
         </div>
         <div className="search-books-results">
@@ -112,7 +100,7 @@ class Search extends React.Component {
                       <div className="book-shelf-changer">
                         <select
                           value={book.shelf ? book.shelf : shelf}
-                          onChange={(e) => this.handleChangeSelect(e, book.id)}
+                          onChange={(e) => this.handleChange(e, book.id)}
                         >
                           {selectItems}
                         </select>
@@ -120,11 +108,7 @@ class Search extends React.Component {
                     </div>
                     <div className="book-title">{book.title}</div>
                     <div className="book-authors">
-                      {book.authors
-                        ? book.authors.map((author, i) => (
-                            <span key={i}>{author}</span>
-                          ))
-                        : null}
+                      {book.authors ? book.authors.join(" ") : null}
                     </div>
                   </div>
                 </li>
